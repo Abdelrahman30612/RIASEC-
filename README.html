@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>اختبار RIASEC</title>
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background:#f7f7fb;color:#111;padding:20px}
+    .container{max-width:900px;margin:0 auto;background:#fff;border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    h1{font-size:22px;margin-bottom:10px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+    .card{border:1px solid #eee;padding:10px;border-radius:8px;background:#fff}
+    label{display:flex;gap:8px;align-items:flex-start}
+    input[type=checkbox]{margin-top:4px}
+    button{margin-top:15px;padding:10px 14px;border:none;border-radius:8px;background:#5b21b6;color:#fff;cursor:pointer}
+    .result{margin-top:20px;padding:12px;border-radius:10px;background:#eee;font-size:20px;font-weight:bold;text-align:center}
+  </style>
+</head>
+<body>
+<div class="container">
+<h1>اختبار RIASEC</h1>
+<form id="quiz">
+<div class="grid" id="verbsGrid"></div>
+<button type="button" id="showBtn">عرض النتيجة</button>
+<button type="button" id="resetBtn">إعادة تعيين</button>
+</form>
+<div id="resultArea"></div>
+</div>
+<script>
+const verbs = [
+// R
+{verb:'احب العمل في السيارات', code:'R'},
+{verb:'احب بناء الاشياء', code:'R'},
+{verb:'احب ان اعتني بالحيوانات', code:'R'},
+{verb:'احب تركيب او تجميع الاشياء', code:'R'},
+{verb:'احب الطبخ', code:'R'},
+{verb:'انا شخص عملي', code:'R'},
+{verb:'احب العمل في الهواء الطلق', code:'R'},
+// I
+{verb:'احب ان العب الالغاز', code:'I'},
+{verb:'احب اجراء التجارب', code:'I'},
+{verb:'انا استمتع بالعلوم', code:'I'},
+{verb:'استمتع بمحاوله معرفه كيفيه عمل الاشياء', code:'I'},
+{verb:'احب تحليل الاشياء (المشاكل-المواقف)', code:'I'},
+{verb:'احب العمل مع الارقام او الرسوم البيانيه', code:'I'},
+{verb:'انا جيد في الرياضيات', code:'I'},
+// A
+{verb:'انا جيدفي العمل بشكل مستقل', code:'A'},
+{verb:'احب ان اقرا عن الفن والموسيقي', code:'A'},
+{verb:'انا استمتع بالكتابه الابداعيه', code:'A'},
+{verb:'انا شخص مبدع', code:'A'},
+{verb:'احب العزف علي الالات الموسيقيه او الغناء', code:'A'},
+{verb:'احب التمثيل في المسرحيات', code:'A'},
+{verb:'احب ان ارسم', code:'A'},
+// S
+{verb:'احب العمل في فرق', code:'S'},
+{verb:'احب تعليم الناس و تدريبهم', code:'S'},
+{verb:'احب محاوله مساعده الناس علي حل مشاكلهم', code:'S'},
+{verb:'انا مهتم بشفاء الناس', code:'S'},
+{verb:'انا استمتع بالتعلم عن الثقافات الاخري', code:'S'},
+{verb:'احب الدخول في مناقشات حول القضايا', code:'S'},
+{verb:'احب مساعده الناس', code:'S'},
+// E
+{verb:'اناء شخص طموح احدد اهدافا لنفسي', code:'E'},
+{verb:'احب ان احاول التاثير علي الناس او اقناعهم', code:'E'},
+{verb:'احب بيع الاشياء', code:'E'},
+{verb:'انا اسرع لتولي مسؤوليات جديده', code:'E'},
+{verb:'اود ان ابداء عملي الخاص', code:'E'},
+{verb:'احب ان اقود', code:'E'},
+{verb:'احب القاء خطاب', code:'E'},
+// C
+{verb:'احب تنظيم الاشياء', code:'C'},
+{verb:'احب ان يكون لدي تعليمات واضحه لاتبعها', code:'C'},
+{verb:'لا امانع العمل 8 ساعات في اليوم في مكتب', code:'C'},
+{verb:'انا انتبه للتفاصيل', code:'C'},
+{verb:'احب ان اقوم بالحفظ في الملفات او الكتابه', code:'C'},
+{verb:'انا جيد في الاحتفاظ بسجلات عملي', code:'C'},
+{verb:'اود ان اعمل في مكتب', code:'C'}
+];
+
+const lettersOrder = ['R','I','A','S','E','C'];
+const verbsGrid = document.getElementById('verbsGrid');
+const resultArea = document.getElementById('resultArea');
+
+verbs.forEach((v, idx) => {
+  const card = document.createElement('div'); card.className = 'card';
+  const id = 'verb_'+idx;
+  card.innerHTML = `<label for="${id}"><input type="checkbox" id="${id}" data-letter="${v.code}"> ${v.verb}</label>`;
+  verbsGrid.appendChild(card);
+});
+
+function computeResult(){
+  const counts = {R:0,I:0,A:0,S:0,E:0,C:0};
+  document.querySelectorAll('#verbsGrid input[type=checkbox]').forEach(ch=>{
+    if(ch.checked){counts[ch.dataset.letter]++}
+  });
+  const arr = Object.keys(counts).map(k=>({letter:k,count:counts[k]}));
+  arr.sort((a,b)=> b.count-a.count || lettersOrder.indexOf(a.letter)-lettersOrder.indexOf(b.letter));
+  return arr.slice(0,3).map(t=>t.letter).join('');
+}
+
+function renderResult(){
+  resultArea.innerHTML = `<div class="result">${computeResult()}</div>`;
+}
+
+document.getElementById('showBtn').addEventListener('click', renderResult);
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  document.querySelectorAll('#verbsGrid input[type=checkbox]').forEach(x=>x.checked=false);
+  resultArea.innerHTML = '';
+});
+</script>
+</body>
+</html>
